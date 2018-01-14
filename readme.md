@@ -143,7 +143,19 @@ Alternatively, set `PURE_RUBY_HIDE=true` to always hide Ruby version.
 
 ### `PURE_RUBY_SYMBOL`
 
-Defines the Ruby version icon. The default value is `⬥`.
+Defines the Ruby version symbol. The default value is `⬥`.
+
+### `PURE_AWS_SHOW` and `PURE_AWS_HIDE`
+
+Defaults to only show if the `AWS_PROFILE` environment variable is set:
+
+To always show the current profile settings, set `PURE_AWS_SHOW=true`. It shows the word 'default' if the environment variable is not set.
+
+Alternatively, set `PURE_AWS_HIDE=true` to always hide the profile settings.
+
+### `PURE_AWS_SYMBOL`
+
+Defines the AWS profile symbol. The default value is `☁`.
 
 ## Example
 

@@ -132,6 +132,8 @@ prompt_pure_preprompt_render() {
 	[[ -n $prompt_pure_node_version ]] && rpreprompt_parts+=('%F{green}${prompt_pure_node_version}%f')
 	# Ruby version
 	[[ -n $prompt_pure_ruby_version ]] && rpreprompt_parts+=('%F{197}${prompt_pure_ruby_version}%f')
+	# AWS profile
+	[[ -n $prompt_pure_aws_profile ]] && rpreprompt_parts+=('%F{214}${prompt_pure_aws_profile}%f')
 
 	local cleaned_ps1=$PROMPT
 	local -H MATCH MBEGIN MEND
@@ -218,6 +220,27 @@ prompt_pure_async_ruby() {
 	[[ ${PURE_RUBY_SHOW:-false} == true ]] || [[ -f '.ruby-version' || -f 'Gemfile' || -f 'Rakefile' || -f 'Capfile' || -n *.rb(#qN^/) ]] || return
 
 	command ruby -v | awk '{ print $2 }'
+}
+
+prompt_pure_async_aws() {
+	setopt localoptions noshwordsplit
+	local aws_profile=$(echo $1 | awk -F '=' '{ print $2 }')
+	# Always hide
+	[[ ${PURE_AWS_HIDE:-false} == true ]] && return
+	# Always show or AWS_PROFILE is set
+	[[ ${PURE_AWS_SHOW:-false} == true ]] || [[ -n $aws_profile ]] || return
+
+	output=$(aws configure list --profile "$aws_profile")
+	profile=$(echo $output | grep profile | awk -F '[[:space:]][[:space:]]+' '{ print $3 }')
+	region=$(echo $output | grep region | awk -F '[[:space:]][[:space:]]+' '{ print $3 }')
+
+	if [[ ${PURE_AWS_REGION_SHOW:-true} == true ]] && [[ -n ${region//<not set>/} ]]; then
+		print "${profile} in ${region}"
+	elif [[ $profile == '<not set>' ]]; then
+		print 'default'
+	else
+		print $profile
+	fi
 }
 
 prompt_pure_async_git_aliases() {
@@ -336,6 +359,7 @@ prompt_pure_async_tasks() {
 	# Versions
 	async_job "prompt_pure" prompt_pure_async_node $PWD
 	async_job "prompt_pure" prompt_pure_async_ruby $PWD
+	async_job "prompt_pure" prompt_pure_async_aws $(env | grep AWS_PROFILE)
 
 	async_job "prompt_pure" prompt_pure_async_vcs_info $PWD
 
@@ -477,6 +501,15 @@ prompt_pure_async_callback() {
 				unset prompt_pure_ruby_version
 			fi
 			[[ $prev_version != $prompt_pure_ruby_version ]] && do_render=1
+			;;
+		prompt_pure_async_aws)
+			local prev_profile=$prompt_pure_aws_profile
+			if [[ -n $output ]]; then
+				typeset -g prompt_pure_aws_profile="${PURE_AWS_SYMBOL:-☁} $output"
+			else
+				unset prompt_pure_aws_profile
+			fi
+			[[ $prev_profile != $prompt_pure_aws_profile ]] && do_render=1
 			;;
 	esac
 
