@@ -24,6 +24,7 @@ Most prompts are cluttered, ugly and slow. I wanted something visually pleasing 
 ### Extra Stuff on This Fork
 
 - Shows Node version. *(Check is done asynchronously!)*
+- Shows Ruby version. *(Check is done asynchronously!)*
 
 ## Install
 
@@ -127,6 +128,22 @@ Alternatively, set `PURE_NODE_HIDE=true` to always hide Node version.
 ### `PURE_NODE_SYMBOL`
 
 Defines the Node version symbol. The default value is `⬢`.
+
+### `PURE_RUBY_SHOW` and `PURE_RUBY_HIDE`
+
+Set `PURE_RUBY_SHOW=true` to always show Ruby version. Defaults to only show Ruby version if any of the following is present:
+
+* `.ruby-version`
+* `Gemfile`
+* `Rakefile`
+* `Capfile`
+* `*.rb`
+
+Alternatively, set `PURE_RUBY_HIDE=true` to always hide Ruby version.
+
+### `PURE_RUBY_SYMBOL`
+
+Defines the Ruby version icon. The default value is `⬥`.
 
 ## Example
 
