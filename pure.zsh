@@ -105,8 +105,10 @@ prompt_pure_preprompt_render() {
 	local git_color=242
 	[[ -n ${prompt_pure_git_last_dirty_check_timestamp+x} ]] && git_color=red
 
-	# Initialize the preprompt array.
+	# Initialize the preprompt arrays.
 	local -a preprompt_parts
+	local -a rpreprompt_parts
+	local space_between_preprompts
 
 	# Set the path.
 	preprompt_parts+=('%F{blue}%~%f')
@@ -126,6 +128,9 @@ prompt_pure_preprompt_render() {
 	# Execution time.
 	[[ -n $prompt_pure_cmd_exec_time ]] && preprompt_parts+=('%F{yellow}${prompt_pure_cmd_exec_time}%f')
 
+	# NodeJS version
+	[[ -n $prompt_pure_node_version ]] && rpreprompt_parts+=('%F{green}${prompt_pure_node_version}%f')
+
 	local cleaned_ps1=$PROMPT
 	local -H MATCH MBEGIN MEND
 	if [[ $PROMPT = *$prompt_newline* ]]; then
@@ -137,11 +142,21 @@ prompt_pure_preprompt_render() {
 	fi
 	unset MATCH MBEGIN MEND
 
+	# Space between left and right preprompts
+	integer preprompt_left_length preprompt_right_length space_length
+	prompt_pure_string_length_to_var "${(j. .)preprompt_parts}" "preprompt_left_length"
+	prompt_pure_string_length_to_var "${(j. .)rpreprompt_parts}" "preprompt_right_length"
+	(( space_length = COLUMNS - preprompt_left_length - preprompt_right_length - 1))
+
+	space_between_preprompts="$(printf %${space_length}s)"
+
 	# Construct the new prompt with a clean preprompt.
 	local -ah ps1
 	ps1=(
 		$prompt_newline           # Initial newline, for spaciousness.
-		${(j. .)preprompt_parts}  # Join parts, space separated.
+		${(j. .)preprompt_parts}  # Join left parts, space separated.
+		$space_between_preprompts # Separate preprompts.
+		${(j. .)rpreprompt_parts} # Join right parts, space separated.
 		$prompt_newline           # Separate preprompt and prompt.
 		$cleaned_ps1
 	)
@@ -177,6 +192,18 @@ prompt_pure_precmd() {
 
 	# print the preprompt
 	prompt_pure_preprompt_render "precmd"
+}
+
+prompt_pure_async_node() {
+	setopt localoptions noshwordsplit extendedglob
+	builtin cd -q $1
+
+	# Always hide
+	[[ ${PURE_NODE_HIDE:-false} == true ]] && return
+	# Always show or found some Node artifacts
+	[[ ${PURE_NODE_SHOW:-false} == true ]] || [[ -f '.node-version' || -f '.nvmrc' || -f 'package.json' || -d 'node_modules' || -n *.js(#qN^/) ]] || return
+
+	command node -v | cut -c2-
 }
 
 prompt_pure_async_git_aliases() {
@@ -291,6 +318,9 @@ prompt_pure_async_tasks() {
 		prompt_pure_vcs_info[top]=
 	fi
 	unset MATCH MBEGIN MEND
+
+	# Versions
+	async_job "prompt_pure" prompt_pure_async_node $PWD
 
 	async_job "prompt_pure" prompt_pure_async_vcs_info $PWD
 
@@ -414,6 +444,15 @@ prompt_pure_async_callback() {
 					do_render=1
 				fi
 			fi
+			;;
+		prompt_pure_async_node)
+			local prev_version=$prompt_pure_node_version
+			if [[ -n $output ]]; then
+				typeset -g prompt_pure_node_version="${PURE_NODE_SYMBOL:-⬢} $output"
+			else
+				unset prompt_pure_node_version
+			fi
+			[[ $prev_version != $prompt_pure_node_version ]] && do_render=1
 			;;
 	esac
 

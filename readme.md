@@ -21,6 +21,9 @@ Most prompts are cluttered, ugly and slow. I wanted something visually pleasing 
 - Shows the current path in the title and the [current folder & command](screenshot-title-cmd.png) when a process is running.
 - Makes an excellent starting point for your own custom prompt.
 
+### Extra Stuff on This Fork
+
+- Shows Node version. *(Check is done asynchronously!)*
 
 ## Install
 
@@ -108,6 +111,22 @@ Defines the git down arrow symbol. The default value is `⇣`.
 ### `PURE_GIT_UP_ARROW`
 
 Defines the git up arrow symbol. The default value is `⇡`.
+
+### `PURE_NODE_HIDE` and `PURE_NODE_SHOW`
+
+Set `PURE_NODE_SHOW=true` to always show Node version. Defaults to only show Node version if any of the following is present:
+
+* `.node-version`
+* `.nvmrc`
+* `package.json`
+* `node_modules/`
+* `*.js`
+
+Alternatively, set `PURE_NODE_HIDE=true` to always hide Node version.
+
+### `PURE_NODE_SYMBOL`
+
+Defines the Node version symbol. The default value is `⬢`.
 
 ## Example
 
