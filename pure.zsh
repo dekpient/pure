@@ -23,7 +23,6 @@
 # \e[K  => clears everything after the cursor on the current line
 # \e[2K => clear everything on the current line
 
-
 # turns seconds into human readable time
 # 165392 => 1d 21h 56m 32s
 # https://github.com/sindresorhus/pretty-time-zsh
@@ -116,17 +115,24 @@ prompt_pure_preprompt_render() {
 	# Add git branch and dirty status info.
 	typeset -gA prompt_pure_vcs_info
 	if [[ -n $prompt_pure_vcs_info[branch] ]]; then
-		preprompt_parts+=("%F{$git_color}"'${prompt_pure_vcs_info[branch]}${prompt_pure_git_dirty}%f')
+		preprompt_parts+=("%F{$git_color}"'${prompt_pure_vcs_info[branch]}${prompt_pure_git_dirty_mark}%f')
 	fi
 	# Git pull/push arrows.
 	if [[ -n $prompt_pure_git_arrows ]]; then
-		preprompt_parts+=('%F{cyan}${prompt_pure_git_arrows}%f')
+		preprompt_parts+=('%F{cyan}${prompt_pure_git_arrows}%f ')
 	fi
+
+	# Detailed Git status
+	[[ -n $prompt_pure_git_staged ]] && preprompt_parts+=('%F{49}${prompt_pure_git_staged}%f')
+	[[ -n $prompt_pure_git_dirty ]] && preprompt_parts+=('%F{160}${prompt_pure_git_dirty}$f')
+	[[ -n $prompt_pure_git_unmerged ]] && preprompt_parts+=('%F{196}${prompt_pure_git_unmerged}$f')
+	[[ -n $prompt_pure_git_untracked ]] && preprompt_parts+=('%F{178}${prompt_pure_git_untracked}$f')
+	[[ -n $prompt_pure_git_stash ]] && preprompt_parts+=('%F{39}${prompt_pure_git_stash}$f')
 
 	# Username and machine, if applicable.
 	[[ -n $prompt_pure_username ]] && preprompt_parts+=('$prompt_pure_username')
 	# Execution time.
-	[[ -n $prompt_pure_cmd_exec_time ]] && preprompt_parts+=('%F{yellow}${prompt_pure_cmd_exec_time}%f')
+	[[ -n $prompt_pure_cmd_exec_time ]] && rpreprompt_parts+=('%F{yellow}${prompt_pure_cmd_exec_time}%f')
 
 	# NodeJS version
 	[[ -n $prompt_pure_node_version ]] && rpreprompt_parts+=('%F{green}${prompt_pure_node_version}%f')
@@ -290,7 +296,6 @@ prompt_pure_async_vcs_info() {
 	print -r - ${(@kvq)info}
 }
 
-# fastest possible way to check if repo is dirty
 prompt_pure_async_git_dirty() {
 	setopt localoptions noshwordsplit
 	local untracked_dirty=$1 dir=$2
@@ -298,13 +303,46 @@ prompt_pure_async_git_dirty() {
 	# use cd -q to avoid side effects of changing directory, e.g. chpwd hooks
 	builtin cd -q $dir
 
-	if [[ $untracked_dirty = 0 ]]; then
-		command git diff --no-ext-diff --quiet --exit-code
+	local args
+	if (( $untracked_dirty )); then
+		args=('-unormal')
 	else
-		test -z "$(command git status --porcelain --ignore-submodules -unormal)"
+		args=('-uno')
 	fi
 
-	return $?
+	local -A reply=(
+		unmerged 0
+		dirty 0
+		staged 0
+		untracked 0
+		stash 0
+	)
+
+	reply[stash]=$(git stash list 2>/dev/null| wc -l|sed 's/^ *//')
+
+	# https://git-scm.com/docs/git-status
+	local line
+	while IFS='' read -r line; do
+		case ${line:0:2} in
+		(DD|AA|?U|U?)
+			reply[unmerged]=$(( $reply[unmerged] + 1 )) ;;
+
+		(?[MD])
+			reply[dirty]=$(( $reply[dirty] + 1 )) ;|
+
+		([MADRC]?)
+			reply[staged]=$(( $reply[staged] + 1 )) ;;
+
+		'??')
+			reply[untracked]=$(( $reply[untracked] + 1 )) ;;
+
+		OK)
+			;;
+
+		esac
+	done < <(git status --porcelain "${args[@]}" && echo OK)
+
+	print -r - ${(@kvq)reply}
 }
 
 prompt_pure_async_git_fetch() {
@@ -347,7 +385,7 @@ prompt_pure_async_tasks() {
 		async_flush_jobs "prompt_pure"
 
 		# reset git preprompt variables, switching working tree
-		unset prompt_pure_git_dirty
+		unset prompt_pure_git_dirty_mark
 		unset prompt_pure_git_last_dirty_check_timestamp
 		unset prompt_pure_git_arrows
 		unset prompt_pure_git_fetch_pattern
@@ -407,6 +445,17 @@ prompt_pure_check_git_arrows() {
 	typeset -g REPLY=$arrows
 }
 
+set_prompt_part_git_info() {
+	setopt localoptions noshwordsplit
+	local info_type=$1 number=$2 symbol=$3 prompt_part_name=$4
+
+	if [[ $number -ne 0 ]]; then
+		typeset -g $prompt_part_name="$symbol $number"
+	else
+		unset $prompt_part_name
+	fi
+}
+
 prompt_pure_async_callback() {
 	setopt localoptions noshwordsplit
 	local job=$1 code=$2 output=$3 exec_time=$4 next_pending=$6
@@ -450,14 +499,38 @@ prompt_pure_async_callback() {
 			fi
 			;;
 		prompt_pure_async_git_dirty)
-			local prev_dirty=$prompt_pure_git_dirty
-			if (( code == 0 )); then
-				unset prompt_pure_git_dirty
+			local -A git_info=("${(Q@)${(z)output}}")
+			local -A prompt_pure_git_prev
+
+			prompt_pure_git_prev[staged]=$prompt_pure_git_staged
+			set_prompt_part_git_info 'staged' $git_info[staged] ${PURE_GIT_STAGED_SYMBOL:-✚} 'prompt_pure_git_staged'
+
+			prompt_pure_git_prev[dirty]=$prompt_pure_git_dirty
+			set_prompt_part_git_info 'dirty' $git_info[dirty] ${PURE_GIT_DIRTY_SYMBOL:-✱} 'prompt_pure_git_dirty'
+
+			prompt_pure_git_prev[unmerged]=$prompt_pure_git_unmerged
+			set_prompt_part_git_info 'unmerged' $git_info[unmerged] ${PURE_GIT_UNMERGED_SYMBOL:-✖} 'prompt_pure_git_unmerged'
+
+			prompt_pure_git_prev[untracked]=$prompt_pure_git_untracked
+			set_prompt_part_git_info 'untracked' $git_info[untracked] ${PURE_GIT_UNTRACKED_SYMBOL:-…} 'prompt_pure_git_untracked'
+
+			prompt_pure_git_prev[stash]=$prompt_pure_git_stash
+			set_prompt_part_git_info 'stash' $git_info[stash] ${PURE_GIT_STASH_SYMBOL:-⚑} 'prompt_pure_git_stash'
+
+			local prev_dirty=$prompt_pure_git_dirty_mark
+			if [[ $git_info[unmerged] != '0' || $git_info[staged] != '0' || $git_info[dirty] != '0' || $git_info[untracked] != '0' ]]; then
+				typeset -g prompt_pure_git_dirty_mark="*"
 			else
-				typeset -g prompt_pure_git_dirty="*"
+				unset prompt_pure_git_dirty_mark
 			fi
 
-			[[ $prev_dirty != $prompt_pure_git_dirty ]] && do_render=1
+			[[
+				prompt_pure_git_prev[staged] != $prompt_pure_git_staged
+				|| prompt_pure_git_prev[dirty] != $prompt_pure_git_dirty
+				|| prompt_pure_git_prev[unmerged] != $prompt_pure_git_unmerged
+				|| prompt_pure_git_prev[untracked] != $prompt_pure_git_untracked
+				|| prompt_pure_git_prev[stash] != $prompt_pure_git_staged
+			 ]] && do_render=1
 
 			# When prompt_pure_git_last_dirty_check_timestamp is set, the git info is displayed in a different color.
 			# To distinguish between a "fresh" and a "cached" result, the preprompt is rendered before setting this
