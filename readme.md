@@ -26,6 +26,12 @@ Most prompts are cluttered, ugly and slow. I wanted something visually pleasing 
 - Shows Node version. *(Check is done asynchronously!)*
 - Shows Ruby version. *(Check is done asynchronously!)*
 - Shows current AWS profile (and region). *(Check is done asynchronously – kind of)*
+- Shows Git working tree changes count. *(Check is done asynchronously!)*
+
+### TODO
+
+- Customizable colors with defaults
+- Fix spacing in SSH sessions
 
 ## Install
 
@@ -157,6 +163,26 @@ Alternatively, set `PURE_AWS_HIDE=true` to always hide the profile settings.
 ### `PURE_AWS_SYMBOL`
 
 Defines the AWS profile symbol. The default value is `☁`.
+
+### `PURE_GIT_STAGED_SYMBOL`
+
+Defines the Git staged files count symbol. The default value is `✚`.
+
+### `PURE_GIT_DIRTY_SYMBOL`
+
+Defines the Git dirty files count symbol. The default value is `✱`.
+
+### `PURE_GIT_UNMERGED_SYMBOL`
+
+Defines the Git unmerged files count symbol. The default value is `✖`.
+
+### `PURE_GIT_UNTRACKED_SYMBOL`
+
+Defines the Git untracked files count symbol. The default value is `…`.
+
+### `PURE_GIT_STASH_SYMBOL`
+
+Defines the Git stash count symbol. The default value is `⚑`.
 
 ## Example
 
