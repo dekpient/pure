@@ -110,7 +110,8 @@ prompt_pure_preprompt_render() {
 	local space_between_preprompts
 
 	# Set the path.
-	preprompt_parts+=('%F{blue}%~%f')
+	local path_color=${PURE_PATH_COLOR:-blue}
+	preprompt_parts+=("%F{$path_color}%~%f")
 
 	# Add git branch and dirty status info.
 	typeset -gA prompt_pure_vcs_info
@@ -122,12 +123,20 @@ prompt_pure_preprompt_render() {
 		preprompt_parts+=('%F{cyan}${prompt_pure_git_arrows}%f ')
 	fi
 
-	# Detailed Git status
-	[[ -n $prompt_pure_git_staged ]] && preprompt_parts+=('%F{49}${prompt_pure_git_staged}%f')
-	[[ -n $prompt_pure_git_dirty ]] && preprompt_parts+=('%F{160}${prompt_pure_git_dirty}$f')
-	[[ -n $prompt_pure_git_unmerged ]] && preprompt_parts+=('%F{196}${prompt_pure_git_unmerged}$f')
-	[[ -n $prompt_pure_git_untracked ]] && preprompt_parts+=('%F{178}${prompt_pure_git_untracked}$f')
-	[[ -n $prompt_pure_git_stash ]] && preprompt_parts+=('%F{39}${prompt_pure_git_stash}$f')
+	# Git status
+	if [[ ${PURE_GIT_STATUS_HIDE:-false} != true && -n $prompt_pure_vcs_info[branch] ]]; then
+		# Define local variables to ensure length calculation (in prompt_pure_string_length_to_var) is correct
+		local staged_color=${PURE_GIT_COLOR_STAGED:-41}
+		[[ -n $prompt_pure_git_staged ]] && preprompt_parts+=("%F{$staged_color}"'${prompt_pure_git_staged}%f')
+		local dirty_color=${PURE_GIT_COLOR_DIRTY:-160}
+		[[ -n $prompt_pure_git_dirty ]] && preprompt_parts+=("%F{$dirty_color}"'${prompt_pure_git_dirty}$f')
+		local unmerged_color=${PURE_GIT_COLOR_UNMERGED:-196}
+		[[ -n $prompt_pure_git_unmerged ]] && preprompt_parts+=("%F{$unmerged_color}"'${prompt_pure_git_unmerged}$f')
+		local untracked_color=${PURE_GIT_COLOR_UNTRACKED:-178}
+		[[ -n $prompt_pure_git_untracked ]] && preprompt_parts+=("%F{$untracked_color}"'${prompt_pure_git_untracked}$f')
+		local stash_color=${PURE_GIT_COLOR_STASH:-39}
+		[[ -n $prompt_pure_git_stash ]] && preprompt_parts+=("%F{$stash_color}"'${prompt_pure_git_stash}$f')
+	fi
 
 	# Username and machine, if applicable.
 	[[ -n $prompt_pure_username ]] && preprompt_parts+=('$prompt_pure_username')
@@ -137,7 +146,7 @@ prompt_pure_preprompt_render() {
 	# NodeJS version
 	[[ -n $prompt_pure_node_version ]] && rpreprompt_parts+=('%F{green}${prompt_pure_node_version}%f')
 	# Ruby version
-	[[ -n $prompt_pure_ruby_version ]] && rpreprompt_parts+=('%F{197}${prompt_pure_ruby_version}%f')
+	[[ -n $prompt_pure_ruby_version ]] && rpreprompt_parts+=('%F{199}${prompt_pure_ruby_version}%f')
 	# AWS profile
 	[[ -n $prompt_pure_aws_profile ]] && rpreprompt_parts+=('%F{214}${prompt_pure_aws_profile}%f')
 

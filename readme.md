@@ -30,7 +30,6 @@ Most prompts are cluttered, ugly and slow. I wanted something visually pleasing 
 
 ### TODO
 
-- Customizable colors with defaults
 - Fix spacing in SSH sessions
 
 ## Install
@@ -120,6 +119,10 @@ Defines the git down arrow symbol. The default value is `⇣`.
 
 Defines the git up arrow symbol. The default value is `⇡`.
 
+### `PURE_PATH_COLOR`
+
+Set the pre-prompt path color. Defaults to blue.
+
 ### `PURE_NODE_HIDE` and `PURE_NODE_SHOW`
 
 Set `PURE_NODE_SHOW=true` to always show Node version. Defaults to only show Node version if any of the following is present:
@@ -164,25 +167,31 @@ Alternatively, set `PURE_AWS_HIDE=true` to always hide the profile settings.
 
 Defines the AWS profile symbol. The default value is `☁`.
 
-### `PURE_GIT_STAGED_SYMBOL`
+### Git Status
 
-Defines the Git staged files count symbol. The default value is `✚`.
+Set `PURE_GIT_STATUS_HIDE=true` to hide Git working tree detailed status.
 
-### `PURE_GIT_DIRTY_SYMBOL`
+#### `PURE_GIT_STAGED_SYMBOL` and `PURE_GIT_COLOR_STAGED`
 
-Defines the Git dirty files count symbol. The default value is `✱`.
+Define the Git staged files count symbol and color. Defaults to `✚` and ![#03D155](https://placehold.it/15/03D155/000000?text=+).
 
-### `PURE_GIT_UNMERGED_SYMBOL`
+#### `PURE_GIT_DIRTY_SYMBOL` and `PURE_GIT_COLOR_DIRTY`
 
-Defines the Git unmerged files count symbol. The default value is `✖`.
+Define the Git dirty files count symbol and color. Default to `✱` and ![#d70000](https://placehold.it/15/d70000/000000?text=+).
 
-### `PURE_GIT_UNTRACKED_SYMBOL`
+#### `PURE_GIT_UNMERGED_SYMBOL` and `PURE_GIT_COLOR_UNMERGED`
 
-Defines the Git untracked files count symbol. The default value is `…`.
+Define the Git unmerged files count symbol and color. Default to `✖` and ![#ff0000](https://placehold.it/15/ff0000/000000?text=+).
 
-### `PURE_GIT_STASH_SYMBOL`
+#### `PURE_GIT_UNTRACKED_SYMBOL` and `PURE_GIT_COLOR_UNTRACKED`
 
-Defines the Git stash count symbol. The default value is `⚑`.
+Define the Git untracked files count symbol and color. Default to `…` and ![#d7af00](https://placehold.it/15/d7af00/000000?text=+).
+
+#### `PURE_GIT_STASH_SYMBOL` and `PURE_GIT_COLOR_STASH`
+
+Define the Git stash count symbol and color. Default to `⚑` and ![#00afff](https://placehold.it/15/00afff/000000?text=+).
+
+Reference: [256 COLORS - CHEAT SHEET](https://jonasjacek.github.io/colors)
 
 ## Example
 
