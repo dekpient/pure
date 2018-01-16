@@ -123,11 +123,13 @@ prompt_pure_preprompt_render() {
 	fi
 
 	# Detailed Git status
-	[[ -n $prompt_pure_git_staged ]] && preprompt_parts+=('%F{49}${prompt_pure_git_staged}%f')
-	[[ -n $prompt_pure_git_dirty ]] && preprompt_parts+=('%F{160}${prompt_pure_git_dirty}$f')
-	[[ -n $prompt_pure_git_unmerged ]] && preprompt_parts+=('%F{196}${prompt_pure_git_unmerged}$f')
-	[[ -n $prompt_pure_git_untracked ]] && preprompt_parts+=('%F{178}${prompt_pure_git_untracked}$f')
-	[[ -n $prompt_pure_git_stash ]] && preprompt_parts+=('%F{39}${prompt_pure_git_stash}$f')
+	if [[ ${PURE_GIT_STATUS_HIDE:-false} != true ]]; then
+		[[ -n $prompt_pure_git_staged ]] && preprompt_parts+=('%F{49}${prompt_pure_git_staged}%f')
+		[[ -n $prompt_pure_git_dirty ]] && preprompt_parts+=('%F{160}${prompt_pure_git_dirty}$f')
+		[[ -n $prompt_pure_git_unmerged ]] && preprompt_parts+=('%F{196}${prompt_pure_git_unmerged}$f')
+		[[ -n $prompt_pure_git_untracked ]] && preprompt_parts+=('%F{178}${prompt_pure_git_untracked}$f')
+		[[ -n $prompt_pure_git_stash ]] && preprompt_parts+=('%F{39}${prompt_pure_git_stash}$f')
+	fi
 
 	# Username and machine, if applicable.
 	[[ -n $prompt_pure_username ]] && preprompt_parts+=('$prompt_pure_username')

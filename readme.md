@@ -164,6 +164,10 @@ Alternatively, set `PURE_AWS_HIDE=true` to always hide the profile settings.
 
 Defines the AWS profile symbol. The default value is `☁`.
 
+### Git Status
+
+Set `PURE_GIT_STATUS_HIDE=true` to hide Git working tree detailed status.
+
 ### `PURE_GIT_STAGED_SYMBOL`
 
 Defines the Git staged files count symbol. The default value is `✚`.
