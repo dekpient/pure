@@ -120,6 +120,10 @@ Defines the git down arrow symbol. The default value is `⇣`.
 
 Defines the git up arrow symbol. The default value is `⇡`.
 
+### `PURE_PATH_COLOR`
+
+Set the pre-prompt path color. Defaults to blue.
+
 ### `PURE_NODE_HIDE` and `PURE_NODE_SHOW`
 
 Set `PURE_NODE_SHOW=true` to always show Node version. Defaults to only show Node version if any of the following is present:

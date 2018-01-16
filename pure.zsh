@@ -110,7 +110,8 @@ prompt_pure_preprompt_render() {
 	local space_between_preprompts
 
 	# Set the path.
-	preprompt_parts+=('%F{blue}%~%f')
+	local path_color=${PURE_PATH_COLOR:-blue}
+	preprompt_parts+=("%F{$path_color}%~%f")
 
 	# Add git branch and dirty status info.
 	typeset -gA prompt_pure_vcs_info
