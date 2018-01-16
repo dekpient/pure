@@ -123,13 +123,19 @@ prompt_pure_preprompt_render() {
 		preprompt_parts+=('%F{cyan}${prompt_pure_git_arrows}%f ')
 	fi
 
-	# Detailed Git status
+	# Git status
 	if [[ ${PURE_GIT_STATUS_HIDE:-false} != true ]]; then
-		[[ -n $prompt_pure_git_staged ]] && preprompt_parts+=('%F{49}${prompt_pure_git_staged}%f')
-		[[ -n $prompt_pure_git_dirty ]] && preprompt_parts+=('%F{160}${prompt_pure_git_dirty}$f')
-		[[ -n $prompt_pure_git_unmerged ]] && preprompt_parts+=('%F{196}${prompt_pure_git_unmerged}$f')
-		[[ -n $prompt_pure_git_untracked ]] && preprompt_parts+=('%F{178}${prompt_pure_git_untracked}$f')
-		[[ -n $prompt_pure_git_stash ]] && preprompt_parts+=('%F{39}${prompt_pure_git_stash}$f')
+		# Define local variables to ensure length calculation (in prompt_pure_string_length_to_var) is correct
+		local staged_color=${PURE_GIT_COLOR_STAGED:-41}
+		[[ -n $prompt_pure_git_staged ]] && preprompt_parts+=("%F{$staged_color}"'${prompt_pure_git_staged}%f')
+		local dirty_color=${PURE_GIT_COLOR_DIRTY:-160}
+		[[ -n $prompt_pure_git_dirty ]] && preprompt_parts+=("%F{$dirty_color}"'${prompt_pure_git_dirty}$f')
+		local unmerged_color=${PURE_GIT_COLOR_UNMERGED:-196}
+		[[ -n $prompt_pure_git_unmerged ]] && preprompt_parts+=("%F{$unmerged_color}"'${prompt_pure_git_unmerged}$f')
+		local untracked_color=${PURE_GIT_COLOR_UNTRACKED:-178}
+		[[ -n $prompt_pure_git_untracked ]] && preprompt_parts+=("%F{$untracked_color}"'${prompt_pure_git_untracked}$f')
+		local stash_color=${PURE_GIT_COLOR_STASH:-39}
+		[[ -n $prompt_pure_git_stash ]] && preprompt_parts+=("%F{$stash_color}"'${prompt_pure_git_stash}$f')
 	fi
 
 	# Username and machine, if applicable.
