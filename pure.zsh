@@ -124,7 +124,7 @@ prompt_pure_preprompt_render() {
 	fi
 
 	# Git status
-	if [[ ${PURE_GIT_STATUS_HIDE:-false} != true ]]; then
+	if [[ ${PURE_GIT_STATUS_HIDE:-false} != true && -n $prompt_pure_vcs_info[branch] ]]; then
 		# Define local variables to ensure length calculation (in prompt_pure_string_length_to_var) is correct
 		local staged_color=${PURE_GIT_COLOR_STAGED:-41}
 		[[ -n $prompt_pure_git_staged ]] && preprompt_parts+=("%F{$staged_color}"'${prompt_pure_git_staged}%f')
@@ -146,7 +146,7 @@ prompt_pure_preprompt_render() {
 	# NodeJS version
 	[[ -n $prompt_pure_node_version ]] && rpreprompt_parts+=('%F{green}${prompt_pure_node_version}%f')
 	# Ruby version
-	[[ -n $prompt_pure_ruby_version ]] && rpreprompt_parts+=('%F{197}${prompt_pure_ruby_version}%f')
+	[[ -n $prompt_pure_ruby_version ]] && rpreprompt_parts+=('%F{199}${prompt_pure_ruby_version}%f')
 	# AWS profile
 	[[ -n $prompt_pure_aws_profile ]] && rpreprompt_parts+=('%F{214}${prompt_pure_aws_profile}%f')
 
