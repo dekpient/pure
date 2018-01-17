@@ -111,7 +111,15 @@ prompt_pure_preprompt_render() {
 
 	# Set the path.
 	local path_color=${PURE_PATH_COLOR:-blue}
-	preprompt_parts+=("%F{$path_color}%~%f")
+	if which disambiguate > /dev/null 2>&1; then
+		local path_limit=$(( COLUMNS / 4 ))
+		integer path_length
+		prompt_pure_string_length_to_var "%~" "path_length"
+
+		[[ $path_length -gt (( $path_limit + 1 )) ]] && preprompt_parts+=("%F{$path_color}$(disambiguate)%f") || preprompt_parts+=("%F{$path_color}%~%f")
+	else
+		preprompt_parts+=("%F{$path_color}%~%f")
+	fi
 
 	# Add git branch and dirty status info.
 	typeset -gA prompt_pure_vcs_info
@@ -496,7 +504,13 @@ prompt_pure_async_callback() {
 			[[ -n $info[top] ]] && [[ -z $prompt_pure_vcs_info[top] ]] && prompt_pure_async_refresh
 
 			# always update branch and toplevel
-			prompt_pure_vcs_info[branch]=$info[branch]
+			local limit=$(( COLUMNS / 4 )) branch_length=${#info[branch][@]}
+			if [[ $branch_length -gt (( $limit + 1 )) ]]; then
+				prompt_pure_vcs_info[branch]="${info[branch][1,$limit]}…"
+			else
+				prompt_pure_vcs_info[branch]=$info[branch]
+			fi
+
 			prompt_pure_vcs_info[top]=$info[top]
 
 			do_render=1
