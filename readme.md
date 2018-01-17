@@ -27,6 +27,7 @@ Most prompts are cluttered, ugly and slow. I wanted something visually pleasing 
 - Shows Ruby version. *(Check is done asynchronously!)*
 - Shows current AWS profile (and region). *(Check is done asynchronously – kind of)*
 - Shows Git working tree changes count. *(Check is done asynchronously!)*
+- Auto shrinking long path and branch name. For path shrinking, you need [`disambiguate`](http://mika.l3ib.org/code/zsh-functions/disambiguate-keeplast) in your `PATH`.
 
 ### TODO
 
